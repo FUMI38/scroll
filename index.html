@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>GSAP PWA Experience</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2582/2582606.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            transition: color 0.5s ease;
+        }
+        body.is-light { color: #000; }
+        .section { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .title { font-size: clamp(3rem, 12vw, 8rem); font-weight: 900; line-height: 1; }
+        #progress-bar { position: fixed; top: 0; left: 0; height: 5px; background: #3b82f6; width: 0%; z-index: 100; }
+    </style>
+</head>
+<body>
+
+    <div id="progress-bar"></div>
+
+    <main>
+        <section class="section">
+            <div class="px-6">
+                <h1 class="title">BLACK</h1>
+                <p class="mt-4 text-xl opacity-60">Scroll to transform</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="px-6">
+                <h2 class="title">EVOLVE</h2>
+                <p class="mt-4 text-xl opacity-60">GSAP ScrollTrigger in action</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="px-6">
+                <h2 class="title">WHITE</h2>
+                <p class="mt-4 text-xl mb-10">PWA Ready & Offline Supported</p>
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="px-12 py-4 border-2 border-current rounded-full font-black tracking-widest hover:bg-black hover:text-white transition-all">
+                    BACK TO TOP
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // GSAP Implementation
+        window.addEventListener('load', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Animate background color from #000 to #fff
+            gsap.to("body", {
+                backgroundColor: "#ffffff",
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 0.5,
+                    onUpdate: (self) => {
+                        // Change text color class at 50% scroll
+                        if (self.progress > 0.5) {
+                            document.body.classList.add('is-light');
+                        } else {
+                            document.body.classList.remove('is-light');
+                        }
+                    }
+                }
+            });
+
+            // Top progress bar
+            gsap.to("#progress-bar", {
+                width: "100%",
+                ease: "none",
+                scrollTrigger: { 
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 0.1 
+                }
+            });
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.log('SW registration failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
+
